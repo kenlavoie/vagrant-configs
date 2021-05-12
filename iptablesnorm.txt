@@ -1,0 +1,116 @@
+ubuntu@node11:~$ sudo su
+root@node11:/home/ubuntu# iptables -L
+Chain INPUT (policy ACCEPT)
+target     prot opt source               destination
+
+Chain FORWARD (policy DROP)
+target     prot opt source               destination
+DOCKER-USER  all  --  anywhere             anywhere
+DOCKER-INGRESS  all  --  anywhere             anywhere
+DOCKER-ISOLATION  all  --  anywhere             anywhere
+ACCEPT     all  --  anywhere             anywhere             ctstate RELATED,ESTABLISHED
+DOCKER     all  --  anywhere             anywhere
+ACCEPT     all  --  anywhere             anywhere
+ACCEPT     all  --  anywhere             anywhere
+ACCEPT     all  --  anywhere             anywhere             ctstate RELATED,ESTABLISHED
+DOCKER     all  --  anywhere             anywhere
+ACCEPT     all  --  anywhere             anywhere
+DROP       all  --  anywhere             anywhere
+
+Chain OUTPUT (policy ACCEPT)
+target     prot opt source               destination
+
+Chain DOCKER (2 references)
+target     prot opt source               destination
+ACCEPT     tcp  --  anywhere             172.17.0.3           tcp dpt:http-alt
+ACCEPT     tcp  --  anywhere             172.17.0.2           tcp dpt:12381
+ACCEPT     tcp  --  anywhere             172.17.0.4           tcp dpt:12384
+ACCEPT     tcp  --  anywhere             172.17.0.4           tcp dpt:12383
+ACCEPT     tcp  --  anywhere             172.17.0.6           tcp dpt:12380
+ACCEPT     tcp  --  anywhere             172.17.0.6           tcp dpt:2379
+ACCEPT     tcp  --  anywhere             172.17.0.8           tcp dpt:2375
+ACCEPT     tcp  --  anywhere             172.17.0.10          tcp dpt:2376
+ACCEPT     tcp  --  anywhere             172.17.0.5           tcp dpt:12387
+ACCEPT     tcp  --  anywhere             172.17.0.7           tcp dpt:12382
+ACCEPT     tcp  --  anywhere             172.17.0.9           tcp dpt:4443
+ACCEPT     tcp  --  anywhere             172.17.0.11          tcp dpt:4443
+
+Chain DOCKER-INGRESS (1 references)
+target     prot opt source               destination
+ACCEPT     tcp  --  anywhere             anywhere             tcp dpt:30002
+ACCEPT     tcp  --  anywhere             anywhere             state RELATED,ESTABLISHED tcp spt:30002
+ACCEPT     tcp  --  anywhere             anywhere             tcp dpt:30001
+ACCEPT     tcp  --  anywhere             anywhere             state RELATED,ESTABLISHED tcp spt:30001
+ACCEPT     tcp  --  anywhere             anywhere             tcp dpt:8443
+ACCEPT     tcp  --  anywhere             anywhere             state RELATED,ESTABLISHED tcp spt:8443
+ACCEPT     tcp  --  anywhere             anywhere             tcp dpt:http
+ACCEPT     tcp  --  anywhere             anywhere             state RELATED,ESTABLISHED tcp spt:http
+ACCEPT     tcp  --  anywhere             anywhere             tcp dpt:30000
+ACCEPT     tcp  --  anywhere             anywhere             state RELATED,ESTABLISHED tcp spt:30000
+RETURN     all  --  anywhere             anywhere
+
+Chain DOCKER-ISOLATION (1 references)
+target     prot opt source               destination
+DROP       all  --  anywhere             anywhere
+DROP       all  --  anywhere             anywhere
+RETURN     all  --  anywhere             anywhere
+
+Chain DOCKER-USER (1 references)
+target     prot opt source               destination
+RETURN     all  --  anywhere             anywhere
+root@node11:/home/ubuntu# iptables -t nat -L
+Chain PREROUTING (policy ACCEPT)
+target     prot opt source               destination
+DOCKER-INGRESS  all  --  anywhere             anywhere             ADDRTYPE match dst-type LOCAL
+DOCKER     all  --  anywhere             anywhere             ADDRTYPE match dst-type LOCAL
+
+Chain INPUT (policy ACCEPT)
+target     prot opt source               destination
+
+Chain OUTPUT (policy ACCEPT)
+target     prot opt source               destination
+DOCKER-INGRESS  all  --  anywhere             anywhere             ADDRTYPE match dst-type LOCAL
+DOCKER     all  --  anywhere            !127.0.0.0/8          ADDRTYPE match dst-type LOCAL
+
+Chain POSTROUTING (policy ACCEPT)
+target     prot opt source               destination
+MASQUERADE  all  --  anywhere             anywhere             ADDRTYPE match src-type LOCAL
+MASQUERADE  all  --  172.17.0.0/16        anywhere
+MASQUERADE  all  --  172.18.0.0/16        anywhere
+MASQUERADE  tcp  --  172.17.0.3           172.17.0.3           tcp dpt:http-alt
+MASQUERADE  tcp  --  172.17.0.2           172.17.0.2           tcp dpt:12381
+MASQUERADE  tcp  --  172.17.0.4           172.17.0.4           tcp dpt:12384
+MASQUERADE  tcp  --  172.17.0.4           172.17.0.4           tcp dpt:12383
+MASQUERADE  tcp  --  172.17.0.6           172.17.0.6           tcp dpt:12380
+MASQUERADE  tcp  --  172.17.0.6           172.17.0.6           tcp dpt:2379
+MASQUERADE  tcp  --  172.17.0.8           172.17.0.8           tcp dpt:2375
+MASQUERADE  tcp  --  172.17.0.10          172.17.0.10          tcp dpt:2376
+MASQUERADE  tcp  --  172.17.0.5           172.17.0.5           tcp dpt:12387
+MASQUERADE  tcp  --  172.17.0.7           172.17.0.7           tcp dpt:12382
+MASQUERADE  tcp  --  172.17.0.9           172.17.0.9           tcp dpt:4443
+MASQUERADE  tcp  --  172.17.0.11          172.17.0.11          tcp dpt:4443
+
+Chain DOCKER (2 references)
+target     prot opt source               destination
+RETURN     all  --  anywhere             anywhere
+RETURN     all  --  anywhere             anywhere
+DNAT       tcp  --  anywhere             anywhere             tcp dpt:https to:172.17.0.3:8080
+DNAT       tcp  --  anywhere             anywhere             tcp dpt:12381 to:172.17.0.2:12381
+DNAT       tcp  --  anywhere             anywhere             tcp dpt:12384 to:172.17.0.4:12384
+DNAT       tcp  --  anywhere             anywhere             tcp dpt:12383 to:172.17.0.4:12383
+DNAT       tcp  --  anywhere             anywhere             tcp dpt:12380 to:172.17.0.6:12380
+DNAT       tcp  --  anywhere             anywhere             tcp dpt:12379 to:172.17.0.6:2379
+DNAT       tcp  --  anywhere             anywhere             tcp dpt:2376 to:172.17.0.8:2375
+DNAT       tcp  --  anywhere             anywhere             tcp dpt:12376 to:172.17.0.10:2376
+DNAT       tcp  --  anywhere             anywhere             tcp dpt:12387 to:172.17.0.5:12387
+DNAT       tcp  --  anywhere             anywhere             tcp dpt:12382 to:172.17.0.7:12382
+DNAT       tcp  --  anywhere             anywhere             tcp dpt:12385 to:172.17.0.9:4443
+DNAT       tcp  --  anywhere             anywhere             tcp dpt:12386 to:172.17.0.11:4443
+
+Chain DOCKER-INGRESS (2 references)
+target     prot opt source               destination
+DNAT       tcp  --  anywhere             anywhere             tcp dpt:30002 to:172.18.0.2:30002
+DNAT       tcp  --  anywhere             anywhere             tcp dpt:30001 to:172.18.0.2:30001
+DNAT       tcp  --  anywhere             anywhere             tcp dpt:8443 to:172.18.0.2:8443
+DNAT       tcp  --  anywhere             anywhere             tcp dpt:http to:172.18.0.2:80
+DNAT       tcp  --  anywhere             anywhere             tcp dpt:30000 to:172.18.0.2:30000

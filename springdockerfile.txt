@@ -1,0 +1,27 @@
+FROM debian:jessie
+
+RUN apt-get update && install -y \
+    curl \
+    nano \
+    wget \
+    software-properties-common
+
+
+RUN sudo add-apt-repository "deb http://ppa.launchpad.net/webupd8team/java/ubuntu xenial main"
+
+RUN apt-get update -y
+
+RUN apt-get install -y oracle-java8-installer (needs to confirm with a y)
+
+RUN cat update-alternatives--config java
+
+RUN sudo nano /usr/lib/jvm/java-8-oracle/jre/bin/java
+
+
+RUN curl -s "https://get.sdkman.io" | bash
+RUN source "$HOME/.sdkman/bin/sdkman-init.sh"
+
+RUN curl -s get.gvmtool.net | bash
+RUN gvm install springboot
+
+RUN mkdir -p src/main/java/hello
